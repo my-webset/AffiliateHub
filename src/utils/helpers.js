@@ -49,17 +49,18 @@ export const formatDate = (iso) => {
     day: 'numeric',
   })
 }
-
-export const formatPrice = (price, currency = 'USD') => {
+export const formatPrice = (price) => {
   const num = parseFloat(price)
   if (isNaN(num)) return ''
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('en-IN', {
     style: 'currency',
-    currency,
+    currency: 'INR',
     minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 0,
   }).format(num)
 }
+
+
 
 export const slugify = (str) =>
   str
