@@ -14,7 +14,7 @@ export default function ProductCard({ product, showShop = false, animDelay = 0 }
     >
       {/* Image */}
       <Link to={`/product/${product.id}`} className="block">
-        <div className="relative aspect-video overflow-hidden bg-surface-card">
+        <div className="relative h-52 overflow-hidden bg-surface-card">
           {product.image ? (
             <img
               src={product.image}
