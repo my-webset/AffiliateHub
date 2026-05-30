@@ -1,17 +1,15 @@
 import { createContext, useContext, useState, useCallback } from 'react'
-import { getItem, setItem, removeItem, KEYS } from '../utils/localStorage'
 
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD?.trim() || ''
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || '123456jai'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [isAdmin, setIsAdmin] = useState(() => !!getItem(KEYS.AUTH))
+  const [isAdmin, setIsAdmin] = useState(false)
   const [loginError, setLoginError] = useState('')
 
   const login = useCallback((password) => {
     if (password === ADMIN_PASSWORD) {
-      setItem(KEYS.AUTH, { loggedIn: true, at: new Date().toISOString() })
       setIsAdmin(true)
       setLoginError('')
       return true
@@ -21,7 +19,6 @@ export function AuthProvider({ children }) {
   }, [])
 
   const logout = useCallback(() => {
-    removeItem(KEYS.AUTH)
     setIsAdmin(false)
   }, [])
 
