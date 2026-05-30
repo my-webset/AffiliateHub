@@ -16,7 +16,7 @@ export default function ShopCard({ shop, animDelay = 0 }) {
       style={{ animationDelay: `${animDelay}ms`, animationFillMode: 'both' }}
     >
       {/* Cover image */}
-      <div className="relative h-40 overflow-hidden bg-surface-card">
+      <div className="relative h-48 overflow-hidden bg-surface-card">
         {imgSrc ? (
           <img
             src={imgSrc}
