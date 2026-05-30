@@ -104,7 +104,7 @@ export default function HomePage() {
                 description={isSearching ? 'Try different search terms' : 'Shops will appear here once admin adds them.'}
               />
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 {filteredShops.map((shop, i) => (
                   <ShopCard key={shop.id} shop={shop} animDelay={i * 60} />
                 ))}
