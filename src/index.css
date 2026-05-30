@@ -218,3 +218,30 @@
   pointer-events: none;
   border-radius: inherit;
 }
+/* Mobile Improvements */
+@media (max-width: 640px) {
+  .card {
+    border-radius: 1rem;
+  }
+
+  .card:hover {
+    transform: none !important;
+  }
+
+  /* Product image taller on mobile */
+  .card .relative.h-52 {
+    height: 11rem;
+  }
+
+  /* Better touch targets */
+  .btn-primary, .btn-secondary {
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+    font-size: 0.8rem;
+  }
+
+  /* Navbar search full width */
+  .navbar-search {
+    width: 100%;
+  }
+}
