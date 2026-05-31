@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { supabase } from './supabase'
+import { supabase } from '../utils/supabase'
+
 
 const DataContext = createContext(null)
 
