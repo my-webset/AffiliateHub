@@ -1,16 +1,31 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Store, Zap } from 'lucide-react'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
-import ShopCard from '../components/ShopCard'
-import ProductCard from '../components/ProductCard'
-import CategoryFilter from '../components/CategoryFilter'
-import EmptyState from '../components/EmptyState'
-import { useData } from '../context/DataContext'
+import Navbar from './Navbar'
+import Footer from './Footer'
+import ShopCard from './ShopCard'
+import ProductCard from './ProductCard'
+import CategoryFilter from './CategoryFilter'
+import EmptyState from './EmptyState'
+import { useData } from './DataContext'
+
+// Skeleton Card
+function SkeletonCard() {
+  return (
+    <div className="glass rounded-2xl overflow-hidden border border-surface-border">
+      <div className="h-48 shimmer-bg" />
+      <div className="p-4 space-y-3">
+        <div className="h-3 rounded-full shimmer-bg w-1/3" />
+        <div className="h-4 rounded-full shimmer-bg w-3/4" />
+        <div className="h-3 rounded-full shimmer-bg w-full" />
+        <div className="h-8 rounded-xl shimmer-bg w-full mt-2" />
+      </div>
+    </div>
+  )
+}
 
 export default function HomePage() {
-  const { shops, products } = useData()
+  const { shops, products, loading } = useData()
   const [searchParams, setSearchParams] = useSearchParams()
   const [query, setQuery] = useState(searchParams.get('q') || '')
   const [category, setCategory] = useState('All')
@@ -50,7 +65,7 @@ export default function HomePage() {
       <div className="grid-bg fixed inset-0 pointer-events-none" />
       <Navbar onSearch={handleSearch} searchValue={query} />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-24 pb-10">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 pt-24 pb-10">
 
         {isSearching && (
           <div className="mb-5 animate-fade-in">
@@ -63,17 +78,17 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className="mb-6">
+        <div className="mb-5">
           <CategoryFilter selected={category} onChange={setCategory} />
         </div>
 
         {isSearching && (
-          <div className="flex items-center gap-1 mb-6 p-1 glass rounded-xl w-fit border border-surface-border">
+          <div className="flex items-center gap-1 mb-5 p-1 glass rounded-xl w-fit border border-surface-border">
             {['shops', 'products'].map((t) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
-                className={`px-5 py-2 rounded-lg text-sm font-semibold capitalize transition-all duration-200 ${
+                className={`px-4 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all duration-200 ${
                   tab === t ? 'bg-brand-500 text-white shadow-lg' : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -85,26 +100,30 @@ export default function HomePage() {
 
         {/* Shops */}
         {(!isSearching || tab === 'shops') && (
-          <section className="mb-12">
-            <div className="flex items-center justify-between mb-5">
+          <section className="mb-10">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="font-display font-bold text-2xl text-white flex items-center gap-2">
-                  <Store size={20} className="text-brand-500" />
+                <h2 className="font-display font-bold text-xl text-white flex items-center gap-2">
+                  <Store size={18} className="text-brand-500" />
                   Shops
                 </h2>
-                <p className="text-sm text-slate-500 mt-0.5">Discover curated affiliate stores</p>
+                <p className="text-xs text-slate-500 mt-0.5">Discover curated affiliate stores</p>
               </div>
               <span className="text-xs text-slate-500">{filteredShops.length} total</span>
             </div>
 
-            {filteredShops.length === 0 ? (
+            {loading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
+              </div>
+            ) : filteredShops.length === 0 ? (
               <EmptyState
                 type="shops"
                 title={isSearching ? 'No shops found' : 'No shops yet'}
                 description={isSearching ? 'Try different search terms' : 'Shops will appear here once admin adds them.'}
               />
             ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 {filteredShops.map((shop, i) => (
                   <ShopCard key={shop.id} shop={shop} animDelay={i * 60} />
                 ))}
@@ -116,18 +135,22 @@ export default function HomePage() {
         {/* Products */}
         {(!isSearching || tab === 'products') && (
           <section>
-            <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="font-display font-bold text-2xl text-white flex items-center gap-2">
-                  <Zap size={20} className="text-brand-500" />
+                <h2 className="font-display font-bold text-xl text-white flex items-center gap-2">
+                  <Zap size={18} className="text-brand-500" />
                   Latest Products
                 </h2>
-                <p className="text-sm text-slate-500 mt-0.5">Handpicked affiliate products</p>
+                <p className="text-xs text-slate-500 mt-0.5">Handpicked affiliate products</p>
               </div>
               <span className="text-xs text-slate-500">{products.length} items</span>
             </div>
 
-            {filteredProducts.length === 0 ? (
+            {loading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {[...Array(8)].map((_, i) => <SkeletonCard key={i} />)}
+              </div>
+            ) : filteredProducts.length === 0 ? (
               <EmptyState
                 type="products"
                 title={isSearching ? 'No products found' : 'No products yet'}
