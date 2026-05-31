@@ -1,7 +1,13 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { supabase } from '../utils/supabase'
+import { supabase } from './supabase'
 
 const DataContext = createContext(null)
+
+const mapProduct = (prod) => ({
+  ...prod,
+  shopId: prod.shop_id,
+  affiliateLink: prod.affiliate_link,
+})
 
 export function DataProvider({ children }) {
   const [shops, setShops] = useState([])
@@ -10,35 +16,32 @@ export function DataProvider({ children }) {
 
   const fetchAll = useCallback(async () => {
     try {
-      // Cache se pehle dikhao
       const cachedShops = localStorage.getItem('cache_shops')
       const cachedProducts = localStorage.getItem('cache_products')
       const cacheTime = localStorage.getItem('cache_time')
-      const isFresh = cacheTime && (Date.now() - parseInt(cacheTime)) < 60000 // 1 min
+      const isFresh = cacheTime && (Date.now() - parseInt(cacheTime)) < 60000
 
       if (cachedShops && cachedProducts) {
         setShops(JSON.parse(cachedShops))
         setProducts(JSON.parse(cachedProducts).map(mapProduct))
         setLoading(false)
-        if (isFresh) return // Cache fresh hai toh Supabase call mat karo
+        if (isFresh) return
       }
 
-      // Background mein fresh data lo
       const [{ data: s }, { data: p }] = await Promise.all([
         supabase.from('shops').select('*').order('created_at', { ascending: false }),
         supabase.from('products').select('*').order('created_at', { ascending: false }),
       ])
 
       const freshShops = s || []
-      const freshProducts = (p || []).map(mapProduct)
+      const freshProducts = p || []
 
       setShops(freshShops)
-      setProducts(freshProducts)
+      setProducts(freshProducts.map(mapProduct))
       setLoading(false)
 
-      // Cache update karo
       localStorage.setItem('cache_shops', JSON.stringify(freshShops))
-      localStorage.setItem('cache_products', JSON.stringify(p || []))
+      localStorage.setItem('cache_products', JSON.stringify(freshProducts))
       localStorage.setItem('cache_time', Date.now().toString())
 
     } catch (err) {
@@ -47,30 +50,28 @@ export function DataProvider({ children }) {
     }
   }, [])
 
-  const mapProduct = (prod) => ({
-    ...prod,
-    shopId: prod.shop_id,
-    affiliateLink: prod.affiliate_link,
-  })
-
   useEffect(() => { fetchAll() }, [fetchAll])
+
+  const invalidateCache = () => localStorage.removeItem('cache_time')
 
   const addShop = async (data) => {
     const { data: s } = await supabase.from('shops').insert([data]).select().single()
-    localStorage.removeItem('cache_time') // Cache invalidate
+    invalidateCache()
     await fetchAll()
     return s
   }
 
   const editShop = async (id, data) => {
-    await supabase.from('shops').update({ ...data, updated_at: new Date().toISOString() }).eq('id', id)
-    localStorage.removeItem('cache_time')
+    await supabase.from('shops')
+      .update({ ...data, updated_at: new Date().toISOString() })
+      .eq('id', id)
+    invalidateCache()
     await fetchAll()
   }
 
   const removeShop = async (id) => {
     await supabase.from('shops').delete().eq('id', id)
-    localStorage.removeItem('cache_time')
+    invalidateCache()
     await fetchAll()
   }
 
@@ -79,7 +80,7 @@ export function DataProvider({ children }) {
     const { data: p } = await supabase.from('products')
       .insert([{ ...rest, shop_id: shopId, affiliate_link: affiliateLink }])
       .select().single()
-    localStorage.removeItem('cache_time')
+    invalidateCache()
     await fetchAll()
     return p
   }
@@ -89,13 +90,13 @@ export function DataProvider({ children }) {
     await supabase.from('products')
       .update({ ...rest, shop_id: shopId, affiliate_link: affiliateLink, updated_at: new Date().toISOString() })
       .eq('id', id)
-    localStorage.removeItem('cache_time')
+    invalidateCache()
     await fetchAll()
   }
 
   const removeProduct = async (id) => {
     await supabase.from('products').delete().eq('id', id)
-    localStorage.removeItem('cache_time')
+    invalidateCache()
     await fetchAll()
   }
 
